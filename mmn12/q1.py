@@ -96,14 +96,15 @@ def apply_laplacian_filter(image: np.ndarray, c: float = -1) -> np.ndarray:
     H_uv = -4 * np.square(np.pi) * np.square(D_uv)  # Eq. (4-124)
     laplacian = np.fft.ifft2(np.fft.fftshift(H_uv * F_uv))  # Eq. (4-125)
     laplacian = laplacian.real  # Take the real part of the Laplacian filter.
-    laplacian /= np.max(np.abs(laplacian))  # Normalize the Laplacian filter to [-1, 1].
-    sharpened_image = image + c * laplacian  # Eq. (4-126)
+    
+    # Normalize the Laplacian filter to [-1, 1].
+    pos_laplacian = laplacian - np.min(laplacian)
+    scaled_laplacian = 2 * (pos_laplacian / np.max(pos_laplacian)) - 1
+    
+    sharpened_image = image + c * scaled_laplacian  # Eq. (4-126)
 
-    # Make the image positive
-    sharpened_image = sharpened_image - min(np.min(sharpened_image), 0)
-
-    # Normalize to [0, 255]
-    sharpened_image = (225 * (sharpened_image / np.max(sharpened_image))).astype(np.uint8)
+    # Return to [0, 255] range.
+    sharpened_image = (255 * np.clip(sharpened_image, 0, 1)).astype(np.uint8)
     
     return sharpened_image
 # ============================= End Of Functions ============================= #
