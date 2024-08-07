@@ -92,10 +92,10 @@ def apply_laplacian_filter(image: np.ndarray, c: float = -1) -> np.ndarray:
     # D_uv is the distance function, Eq. (4-112)
     D_uv = np.sqrt(np.square(np.arange(P) - P / 2)[:, None] + np.square(np.arange(Q) - Q / 2)[None, :])
     
-    F_uv = np.fft.fft2(image)
+    F_uv = np.fft.fftshift(np.fft.fft2(image))
     H_uv = -4 * np.square(np.pi) * np.square(D_uv)  # Eq. (4-124)
-    laplacian = np.fft.ifft2(H_uv * F_uv)  # Eq. (4-125)
-    laplacian = np.real(laplacian)  # Take the real part of the Laplacian filter.
+    laplacian = np.fft.ifft2(np.fft.fftshift(H_uv * F_uv))  # Eq. (4-125)
+    laplacian = laplacian.real  # Take the real part of the Laplacian filter.
     laplacian /= np.max(np.abs(laplacian))  # Normalize the Laplacian filter to [-1, 1].
     sharpened_image = image + c * laplacian  # Eq. (4-126)
 
